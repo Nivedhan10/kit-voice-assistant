@@ -19,45 +19,57 @@
     <nav>
       <a href="/" class="nav-link">🏛️ Home & Admissions</a>
       <a href="/portal" class="nav-link">🎓 Student & Faculty Portal</a>
-      <a href="/history" class="nav-link active">📜 Conversation History</a>
+      <a href="/history" id="nav-history-link" class="nav-link active" style="display:none;">📜 Conversation History</a>
       <div id="header-user-badge" style="display:none;" class="nav-badge-user"></div>
       <a href="/portal" id="header-login-btn" class="btn-header-action btn-header-login">Portal Login</a>
     </nav>
   </header>
 
   <main>
-    <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
-      <div>
-        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--brand-navy); letter-spacing: -0.02em;">
-          Conversation History & Audit Logs
-        </h1>
-        <p style="color: var(--text-muted); font-size: 0.92rem;">
-          Complete chronological transcripts and executed tool actions stored securely in the database.
-        </p>
+    <!-- 1. UNAUTHENTICATED RESTRICTED VIEW -->
+    <div id="unauth-container" style="display: none; max-width: 520px; margin: 4rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-lg); padding: 2.75rem 2rem; text-align: center; box-shadow: var(--shadow-lg);">
+      <div style="width: 60px; height: 60px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1.25rem auto;">
+        🔒
       </div>
-      <div>
-        <button onclick="toggleAllSessions()" id="btn-toggle-all" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:0.45rem 0.95rem; border-radius:var(--radius-full); font-weight:700; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;">
-          🔍 View All Campus Logs
-        </button>
-      </div>
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--brand-navy); margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+        Private Conversation Archive
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 1.75rem;">
+        Conversation history contains confidential student academic queries and faculty records. Please sign in to your campus account to view your private voice logs.
+      </p>
+      <a href="/portal" class="btn-hero-primary" style="text-decoration: none; justify-content: center; width: 100%;">
+        Sign In via Campus Portal &rarr;
+      </a>
     </div>
 
-    <div class="history-container-box">
-      <!-- Sidebar of conversations -->
-      <div class="history-sidebar-pane">
-        <div class="history-sidebar-header">
-          <span id="session-count-label">Recorded Sessions</span>
-          <span style="font-size:0.7rem; color:#2563eb; font-weight:700;" id="filter-mode-tag">My Session</span>
-        </div>
-        <div class="history-session-list" id="conv-items">
-          <div style="font-size:0.85rem; color:#64748b; padding:1rem; text-align:center;">Loading sessions...</div>
-        </div>
+    <!-- 2. AUTHENTICATED USER HISTORY VIEW -->
+    <div id="auth-container" style="display: none;">
+      <div style="margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--brand-navy); letter-spacing: -0.02em;">
+          <span id="user-history-title">My Conversation History</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          Chronological voice transcripts and executed academic tool actions recorded exclusively for your account.
+        </p>
       </div>
 
-      <!-- Messages list for selected conversation -->
-      <div class="history-detail-pane" id="messages-container">
-        <div style="color: var(--text-muted); text-align: center; margin-top: 5rem;">
-          Select a session from the left to view transcripts and executed tool actions.
+      <div class="history-container-box">
+        <!-- Sidebar of conversations -->
+        <div class="history-sidebar-pane">
+          <div class="history-sidebar-header">
+            <span id="session-count-label">Recorded Sessions</span>
+            <span style="font-size:0.72rem; color:#10b981; font-weight:700;">🔒 User Isolated</span>
+          </div>
+          <div class="history-session-list" id="conv-items">
+            <div style="font-size:0.85rem; color:#64748b; padding:1.5rem; text-align:center;">Loading sessions...</div>
+          </div>
+        </div>
+
+        <!-- Messages list for selected conversation -->
+        <div class="history-detail-pane" id="messages-container">
+          <div style="color: var(--text-muted); text-align: center; margin-top: 5rem;">
+            Select a session from the left to view transcripts and executed tool actions.
+          </div>
         </div>
       </div>
     </div>
@@ -70,26 +82,36 @@
   <script src="/static/js/app.js"></script>
   <script>
     let activeConvId = null;
-    let showingAll = false;
 
-    async function toggleAllSessions() {
-      showingAll = !showingAll;
-      const btn = document.getElementById("btn-toggle-all");
-      const tag = document.getElementById("filter-mode-tag");
-      if (showingAll) {
-        btn.innerText = "👤 Show Only My Session";
-        tag.innerText = "All Campus Logs";
-      } else {
-        btn.innerText = "🔍 View All Campus Logs";
-        tag.innerText = "My Session";
+    async function checkHistoryAuth() {
+      try {
+        const res = await fetch("/api/v1/auth/me");
+        const user = await res.json();
+
+        if (user.authenticated) {
+          document.getElementById("unauth-container").style.display = "none";
+          document.getElementById("auth-container").style.display = "block";
+          document.getElementById("user-history-title").innerText = `${user.full_name || user.login_id} · Voice History`;
+          loadConversations();
+        } else {
+          document.getElementById("unauth-container").style.display = "block";
+          document.getElementById("auth-container").style.display = "none";
+        }
+      } catch (e) {
+        document.getElementById("unauth-container").style.display = "block";
+        document.getElementById("auth-container").style.display = "none";
       }
-      loadConversations();
     }
 
     async function loadConversations() {
       try {
-        const url = showingAll ? "/api/v1/history/conversations?all=true" : "/api/v1/history/conversations";
-        const res = await fetch(url);
+        const res = await fetch("/api/v1/history/conversations");
+        if (res.status === 401) {
+          document.getElementById("unauth-container").style.display = "block";
+          document.getElementById("auth-container").style.display = "none";
+          return;
+        }
+
         const data = await res.json();
         const container = document.getElementById("conv-items");
         const countLabel = document.getElementById("session-count-label");
@@ -99,7 +121,7 @@
           countLabel.innerText = "Recorded Sessions (0)";
           document.getElementById("messages-container").innerHTML = `
             <div style="color: var(--text-muted); text-align: center; margin-top: 5rem;">
-              No voice interactions recorded yet.<br>
+              No voice interactions recorded yet for this account.<br>
               <a href="/portal" style="color:#2563eb; font-weight:700; text-decoration:none;">Open Campus Portal to speak with assistant &rarr;</a>
             </div>
           `;
@@ -114,15 +136,14 @@
           item.onclick = () => selectConversation(conv.id, item);
 
           const roleClass = conv.role === "teacher" ? "badge-teacher" : "badge-student";
-          const roleLabel = (conv.role || "public").toUpperCase();
-          const userSuffix = conv.user_id ? ` · User #${conv.user_id}` : "";
+          const roleLabel = (conv.role || "student").toUpperCase();
 
           item.innerHTML = `
             <div class="session-card-top">
               <span class="session-title">${conv.title}</span>
               <span class="badge-role ${roleClass}">${roleLabel}</span>
             </div>
-            <div class="session-time">${new Date(conv.created_at).toLocaleString()} · ${conv.message_count} msgs${userSuffix}</div>
+            <div class="session-time">${new Date(conv.created_at).toLocaleString()} · ${conv.message_count} msgs</div>
             <div class="session-preview">${conv.last_message || 'Voice interaction recorded'}</div>
           `;
           container.appendChild(item);
@@ -147,8 +168,12 @@
 
       try {
         const res = await fetch(`/api/v1/history/conversations/${convId}`);
-        const data = await res.json();
+        if (!res.ok) {
+          msgContainer.innerHTML = `<div style='color:#dc2626; padding:2rem; text-align:center;'>Access Denied: You can only view your own conversation history.</div>`;
+          return;
+        }
 
+        const data = await res.json();
         msgContainer.innerHTML = "";
         if (!data.messages || data.messages.length === 0) {
           msgContainer.innerHTML = "<div style='color:#64748b;'>No messages in this session.</div>";
@@ -196,7 +221,7 @@
       }
     }
 
-    loadConversations();
+    checkHistoryAuth();
   </script>
 </body>
 </html>

@@ -299,8 +299,13 @@ async function syncHeaderAuthState() {
 
     const headerUser = document.getElementById("header-user-badge");
     const loginBtn = document.getElementById("header-login-btn");
+    const historyLink = document.getElementById("nav-history-link");
 
     if (data.authenticated) {
+      if (historyLink) {
+        historyLink.style.display = "inline-flex";
+      }
+
       if (headerUser) {
         headerUser.style.display = "flex";
         headerUser.innerHTML = `<span class="dot-live"></span> ${data.full_name || data.login_id} (${data.role.toUpperCase()})`;
@@ -312,6 +317,10 @@ async function syncHeaderAuthState() {
         loginBtn.onclick = (e) => { e.preventDefault(); doLogoutAndRedirect(); };
       }
     } else {
+      if (historyLink) {
+        historyLink.style.display = "none";
+      }
+
       if (headerUser) {
         headerUser.style.display = "none";
       }

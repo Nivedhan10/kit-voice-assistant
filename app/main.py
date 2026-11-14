@@ -239,18 +239,32 @@ async def voice_chat(
     }
 
 
-# --- History Endpoints ---
+# --- History Endpoints (Strictly Authenticated) ---
 @app.get("/api/v1/history/conversations")
-async def list_conversations(all: bool = False, session: SessionData = Depends(get_session)):
+async def list_conversations(session: SessionData = Depends(get_session)):
+    if not session.is_authenticated():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required. Please log in to view conversation history."
+        )
     convs = history_store.get_user_conversations(
         session_id=session.session_id,
-        user_id=str(session.user_id) if session.user_id else None,
-        all_sessions=all
+        user_id=str(session.user_id)
     )
     return {"conversations": convs}
 
 
 @app.get("/api/v1/history/conversations/{conv_id}")
 async def get_conversation_details(conv_id: str, session: SessionData = Depends(get_session)):
-    messages = history_store.get_conversation_messages(conv_id, limit=50)
+    if not session.is_authenticated():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required. Please log in to view conversation details."
+        )
+    messages = history_store.get_user_conversation_messages(conv_id, user_id=str(session.user_id), limit=50)
+    if messages is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Conversation belongs to another user."
+        )
     return {"conversation_id": conv_id, "messages": messages}

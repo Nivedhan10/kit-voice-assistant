@@ -97,14 +97,25 @@ class HistoryStore:
                 })
             return result
 
-    def get_user_conversations(self, session_id: str, user_id: Optional[str] = None, all_sessions: bool = False) -> List[Dict[str, Any]]:
+    def get_user_conversation_messages(self, conversation_id: str, user_id: str, limit: int = 50) -> Optional[List[Dict[str, Any]]]:
         with self.db_factory() as db:
-            query = select(DBConversation).order_by(DBConversation.created_at.desc())
-            if not all_sessions:
-                if user_id:
-                    query = query.where(DBConversation.user_id == str(user_id))
-                else:
-                    query = query.where(DBConversation.session_id == session_id)
+            conv = db.execute(select(DBConversation).where(DBConversation.id == conversation_id)).scalars().first()
+            if not conv:
+                return None
+            # Strict isolation: Conversation must belong to the requesting user
+            if conv.user_id != str(user_id):
+                return None
+            return self.get_conversation_messages(conversation_id, limit=limit)
+
+    def get_user_conversations(self, session_id: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        with self.db_factory() as db:
+            if not user_id:
+                return []
+            query = (
+                select(DBConversation)
+                .where(DBConversation.user_id == str(user_id))
+                .order_by(DBConversation.created_at.desc())
+            )
 
             conversations = db.execute(query).scalars().all()
             output = []
