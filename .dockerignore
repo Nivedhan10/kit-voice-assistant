@@ -1,0 +1,39 @@
+# Ignore secrets & environment files
+.env
+.env.*
+!.env.example
+
+# Ignore local database files
+*.db
+*.sqlite
+*.sqlite3
+kit_assistant.db
+
+# Ignore version control & IDE
+.git
+.github
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+# Ignore Python caches & virtual environments
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+venv
+.venv
+env
+
+# Ignore temp files & node
+node_modules
+documents/
+*.webm
+*.wav
+*.mp3
+*.log
+

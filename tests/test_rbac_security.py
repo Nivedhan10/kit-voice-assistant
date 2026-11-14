@@ -89,3 +89,29 @@ def test_tool_schemas_do_not_contain_user_identity_parameters():
         assert "user_id" not in params, f"Security risk: {t['function']['name']} exposes user_id parameter"
         assert "student_id" not in params, f"Security risk: {t['function']['name']} exposes student_id parameter"
 
+
+def test_health_endpoints():
+    """Both /health and /api/v1/health must return 200 without network dependencies."""
+    from starlette.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    r1 = client.get("/health")
+    assert r1.status_code == 200
+    assert r1.json()["status"] == "healthy"
+
+    r2 = client.get("/api/v1/health")
+    assert r2.status_code == 200
+    assert r2.json()["status"] == "healthy"
+
+
+def test_history_endpoint_unauthenticated_blocked():
+    """Unauthenticated access to conversation history must be rejected with 401."""
+    from starlette.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    res = client.get("/api/v1/history/conversations")
+    assert res.status_code == 401
+    assert "Authentication required" in res.json()["detail"]
+

@@ -191,12 +191,15 @@ The knowledge base avoids generic "search-everything" endpoints. Each source is 
 
 ---
 
-## 7. Persistence & Production Hosting
+## 7. Persistence & Production Hosting (Render + Neon)
 
-* **Database Engine:** SQLAlchemy 2.0 ORM.
-* **Development/Local:** SQLite (`kit_assistant.db`).
-* **Production Deployment:** Configured via `DATABASE_URL`. Set `DATABASE_URL=postgresql://...` to connect to hosted PostgreSQL (e.g. Neon, Supabase, or Render Postgres).
-* **Limitation Note:** When deploying to serverless containers with ephemeral filesystems (like basic container instances or Vercel functions), local SQLite databases reset on new container cold starts. Providing a hosted PostgreSQL connection string in `DATABASE_URL` provides permanent cross-deployment conversation persistence.
+* **Database Engine:** SQLAlchemy 2.0 ORM with PostgreSQL (`psycopg2-binary`) and SQLite support.
+* **Development/Local:** SQLite (`kit_assistant.db` via `sqlite:///./kit_assistant.db`).
+* **Production Deployment:** Backed by **Neon PostgreSQL** via `DATABASE_URL=postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require`.
+  - **Connection Pooling:** Uses `pool_pre_ping=True` and `pool_recycle=300` to transparently recover from Neon scale-to-zero dormancy.
+  - **URL Normalization:** Automatically converts legacy `postgres://` schemes to `postgresql://` and passes `sslmode=require` query parameters natively.
+  - **User Data Isolation:** Conversations and message threads are strictly filtered by authenticated `user_id`. Unauthenticated or cross-user queries return 401/403.
+  - **Failure Resilience:** DB read/write errors are logged server-side and degrade gracefully to ephemeral session IDs so voice turns never return HTTP 500.
 
 ---
 
