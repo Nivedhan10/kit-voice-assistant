@@ -36,6 +36,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Trust X-Forwarded-Proto from Render/reverse proxy
+@app.middleware("http")
+async def proxy_headers_middleware(request: Request, call_next):
+    proto = request.headers.get("x-forwarded-proto")
+    if proto:
+        request.scope["scheme"] = proto
+    return await call_next(request)
+
+
+# Startup Configuration Validation
+@app.on_event("startup")
+async def on_startup():
+    if not settings.COLLEGE_API_KEY:
+        logger.error("Required environment variable COLLEGE_API_KEY is missing. College system integration requires this key.")
+    if not settings.GROQ_API_KEY and not settings.GEMINI_API_KEY and not settings.OPENAI_API_KEY:
+        logger.warning("No AI provider key configured. Speech and LLM will use deterministic fallback engine.")
+
+
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -71,15 +89,14 @@ async def history_page():
         return HTMLResponse(content=f.read())
 
 
-# --- Health Check ---
+# --- Health Check (Fast & zero external calls) ---
+@app.get("/health")
 @app.get("/api/v1/health")
 async def health_check():
     return {
         "status": "healthy",
         "service": "KIT Real-Time Voice Assistant",
         "version": "1.0.0",
-        "tts_provider": "edge_tts",
-        "college_system": settings.COLLEGE_API_BASE_URL,
     }
 
 
@@ -102,7 +119,7 @@ async def login(payload: LoginPayload, response: Response):
             max_age=settings.SESSION_MAX_AGE_SECONDS,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=settings.COOKIE_SECURE,
         )
 
         return {

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: kit-voice-assistant
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: COLLEGE_API_BASE_URL
+        value: https://ht.knowvally.com
+      - key: COLLEGE_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET_KEY
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: PRIMARY_LLM_MODEL
+        value: openai/gpt-oss-120b
+      - key: PRIMARY_STT_MODEL
+        value: whisper-large-v3-turbo
+      - key: TTS_PROVIDER
+        value: edge_tts

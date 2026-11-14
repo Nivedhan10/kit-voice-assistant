@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     SESSION_SECRET_KEY: str = Field(default="kit-voice-assistant-production-secret-2026")
     SESSION_COOKIE_NAME: str = Field(default="kit_session_id")
     SESSION_MAX_AGE_SECONDS: int = Field(default=28800)  # 8 hours matching college token
+    COOKIE_SECURE: bool = Field(default=False)
 
     # Persistence
     DATABASE_URL: str = Field(default="sqlite:///./kit_assistant.db")

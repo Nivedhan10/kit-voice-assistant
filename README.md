@@ -131,25 +131,74 @@ Open [http://localhost:8000](http://localhost:8000) in your browser:
 
 ---
 
-## 5. Test Credentials
+## 5. Deploying to Render + Neon
+
+The service is pre-configured for automated deployment on **Render** (as a long-running Python Web Service) backed by **Neon PostgreSQL** (for zero-maintenance serverless persistence).
+
+### Environment Variables Matrix
+
+| Variable Name | Required? | Default / Example | Purpose |
+|---|---|---|---|
+| `COLLEGE_API_KEY` | **Yes** | `kit_live_...` | Participant key for Knotopian Institute of Technology API |
+| `COLLEGE_API_BASE_URL` | No | `https://ht.knowvally.com` | Base URL for college system endpoints |
+| `GROQ_API_KEY` | **Yes** | `gsk_...` | Primary STT (Whisper Large v3) and primary LLM (LLaMA 3.3) |
+| `GEMINI_API_KEY` | No | `AIza...` | Secondary LLM fallback via Google AI Studio |
+| `OPENAI_API_KEY` | No | `sk-...` | Tertiary cloud backup for speech and LLM |
+| `PRIMARY_LLM_MODEL` | No | `openai/gpt-oss-120b` | Primary LLM model identifier |
+| `FALLBACK_LLM_MODEL` | No | `openai/gpt-oss-20b` | Fallback LLM model identifier |
+| `PRIMARY_STT_MODEL` | No | `whisper-large-v3-turbo` | Primary Whisper STT model |
+| `FALLBACK_STT_MODEL` | No | `whisper-large-v3` | Secondary Whisper STT model |
+| `TTS_PROVIDER` | No | `edge_tts` | Text-to-speech provider (`edge_tts` or `openai`) |
+| `EDGE_TTS_VOICE` | No | `en-US-JennyNeural` | Voice identifier for Microsoft Edge Neural TTS |
+| `SESSION_SECRET_KEY` | **Yes** | *(random 48-char secret)* | HMAC key used to sign `kit_session_id` cookies |
+| `SESSION_COOKIE_NAME` | No | `kit_session_id` | Name of the session cookie |
+| `SESSION_MAX_AGE_SECONDS`| No | `28800` | Cookie lifetime (8 hours, matching college auth token) |
+| `COOKIE_SECURE` | No | `true` (prod) / `false` (dev) | Enforces `Secure` flag on HTTPS deployments |
+| `DATABASE_URL` | **Yes** (prod) | `postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require` | Neon PostgreSQL pooled connection string (falls back to SQLite offline) |
+| `MIN_ATTENDANCE_PERCENT` | No | `75.0` | Handbook Rule 4.1.1 attendance eligibility threshold |
+| `MAX_OD_DAYS_PER_SEMESTER`| No | `10` | Handbook Rule 6.4.5 semester on-duty cap |
+| `OD_PROOF_DEADLINE_DAYS` | No | `3` | Circular 12/2026 on-duty proof submission window |
+
+### Setup Instructions
+
+1. **Generate Session Secret:**
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(48))"
+   ```
+2. **Neon Database Connection String:**
+   Create a free project at [neon.tech](https://neon.tech) and copy the **Pooled connection string**:
+   ```
+   postgresql://user:password@ep-xyz.neon.tech/neondb?sslmode=require
+   ```
+   *(Note: The app automatically normalizes legacy `postgres://` URLs to `postgresql://` and sets `pool_pre_ping=True` to seamlessly handle Neon's scale-to-zero wakeups).*
+3. **Render Web Service Settings:**
+   * **Runtime:** Python 3
+   * **Build Command:** `pip install -r requirements.txt`
+   * **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   * **Health Check Path:** `/health`
+   * *(Note: Free-tier instances spin down after inactivity; initial cold starts may take ~30 seconds).*
+
+---
+
+## 6. Test Credentials
 
 | Role | Username | Password | Notes |
 |---|---|---|---|
-| Student | `arjun` | `Kit@2026` | 2nd Year CSE-2A, Attendance: 76.0% |
-| Student | `priya` | `Kit@2026` | 2nd Year CSE-2A |
+| Student | `arjun` | `Kit@2026` | 2nd Year CSE-2A, Attendance: 76.0% (Eligible) |
+| Student | `priya` | `Kit@2026` | 2nd Year CSE-2A, Attendance: 70.0% (Shortage Warning) |
 | Student | `kavya` | `Kit@2026` | 2nd Year CSE-2A |
-| Teacher | `lakshmi` | `Kit@2026` | Class Advisor for CSE-2A |
+| Teacher | `lakshmi` | `Kit@2026` | Class Advisor for CSE-2A (3 Pending Approvals) |
 | Teacher | `senthil` | `Kit@2026` | Department Faculty |
 
 ---
 
-## 6. Running the Automated Test Suite
+## 7. Running the Automated Test Suite
 
-All tests run offline using mocks and evaluate RBAC security, rule enforcement, confirmation states, prompt injection defenses, and fallback handlers:
+All tests run offline using mocks and evaluate RBAC security, rule enforcement, confirmation states, prompt injection defenses, Postgres URL normalization, and fallback handlers:
 
 ```bash
 pytest -v
 ```
 
-All 19 test cases pass in under 2 seconds.
+All 26 test cases pass completely offline in under 3 seconds.
 
