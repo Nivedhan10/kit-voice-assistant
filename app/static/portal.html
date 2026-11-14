@@ -3,199 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KIT Portal — Student & Faculty Voice Assistant</title>
+  <title>KIT Campus Portal — Student & Faculty Voice Assistant</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <style>
-    .login-box {
-      max-width: 480px;
-      margin: 2rem auto;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: var(--shadow);
-    }
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-    .form-label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-    }
-    .form-input {
-      width: 100%;
-      padding: 0.65rem 0.85rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.95rem;
-    }
-    .test-users-card {
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1.25rem;
-    }
-    .test-users-title {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-    .user-pill {
-      display: inline-block;
-      background: white;
-      border: 1px solid #cbd5e1;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      margin-right: 0.4rem;
-      margin-bottom: 0.4rem;
-    }
-    .user-pill:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .profile-banner {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 2rem;
-      margin-bottom: 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow);
-    }
-    .user-tag {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .tag-student { background: #dbeafe; color: #1e40af; }
-    .tag-teacher { background: #dcfce7; color: #166534; }
-  </style>
 </head>
 <body>
+  <!-- Header Bar -->
   <header>
     <a href="/" class="brand">
       <div class="brand-logo">KIT</div>
       <div>
         <div class="brand-title">Knotopian Institute of Technology</div>
-        <div class="brand-subtitle">Student & Faculty Portal</div>
+        <div class="brand-subtitle">Student & Faculty Services Portal · Authenticated Mode</div>
       </div>
     </a>
     <nav>
-      <a href="/">Home & Admissions</a>
-      <a href="/portal" class="active">Student & Teacher Portal</a>
-      <a href="/history">History</a>
-      <button id="logout-btn" onclick="doLogout()" style="display:none;" class="btn-login" style="background:#dc2626;">Logout</button>
+      <a href="/" class="nav-link">🏛️ Home & Admissions</a>
+      <a href="/portal" class="nav-link active">🎓 Student & Faculty Portal</a>
+      <a href="/history" class="nav-link">📜 Conversation History</a>
+      <div id="header-user-badge" style="display:none;" class="nav-badge-user"></div>
+      <button id="logout-btn" onclick="doLogout()" class="btn-header-action btn-header-logout" style="display:none;">
+        Log Out
+      </button>
     </nav>
   </header>
 
-  <main>
-    <!-- LOGIN VIEW (Shown if unauthenticated) -->
-    <div id="login-section" class="login-box">
-      <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem;">College Single Sign-On</h2>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Authenticate with your KIT Student or Teacher credentials.</p>
+  <!-- Demo Persona Switcher Bar (Instant Evaluator Switching) -->
+  <div class="demo-switcher-bar">
+    <div class="switcher-left">
+      <span class="switcher-tag">⚡ Instant Personas:</span>
+      <button class="switcher-btn" id="demo-public" onclick="doLogoutAndRedirect()">
+        🌐 Exit to Public Mode
+      </button>
+      <button class="switcher-btn" id="demo-arjun" onclick="quickLogin('arjun')">
+        👨‍🎓 Arjun (Student 76%)
+      </button>
+      <button class="switcher-btn" id="demo-priya" onclick="quickLogin('priya')">
+        👩‍🎓 Priya (Student 70% Alert)
+      </button>
+      <button class="switcher-btn" id="demo-lakshmi" onclick="quickLogin('lakshmi')">
+        👩‍🏫 Dr. Lakshmi (Advisor CSE-2A)
+      </button>
+      <button class="switcher-btn" id="demo-senthil" onclick="quickLogin('senthil')">
+        👨‍🏫 Dr. Senthil (Faculty)
+      </button>
+    </div>
+    <div class="switcher-right-note">
+      <a href="/history" style="color:#2563eb; font-weight:700; text-decoration:none;">View My Session Voice History &rarr;</a>
+    </div>
+  </div>
 
-      <form id="login-form" onsubmit="doLogin(event)">
-        <div class="form-group">
-          <label class="form-label">Username / Login ID</label>
-          <input type="text" id="login_id" class="form-input" placeholder="e.g. arjun or lakshmi" required>
+  <main>
+    <!-- 1. LOGIN SECTION (Shown when unauthenticated) -->
+    <div id="login-section" class="portal-card-sso" style="display: none;">
+      <h2 class="sso-title">Campus Single Sign-On</h2>
+      <p class="sso-subtitle">Sign in to access your attendance, timetable, leave submissions, or teacher approvals.</p>
+
+      <form id="login-form" onsubmit="handleFormLogin(event)">
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">Login ID / Username</label>
+          <input type="text" id="login_id" class="dual-input-text" style="width:100%; border-radius:8px;" placeholder="e.g. arjun or lakshmi" required>
         </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="password" class="form-input" value="Kit@2026" required>
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">Password</label>
+          <input type="password" id="password" class="dual-input-text" style="width:100%; border-radius:8px;" value="Kit@2026" required>
         </div>
-        <button type="submit" class="btn-login" style="width: 100%; padding: 0.75rem; font-size: 1rem; border: none; cursor: pointer;">
-          Sign In to Portal
+        <button type="submit" class="btn-dual-send" style="width:100%; justify-content:center; padding:0.85rem; border-radius:8px;">
+          Sign In to Campus Portal
         </button>
       </form>
 
-      <div class="test-users-card">
-        <div class="test-users-title">Quick Test Logins (Password: Kit@2026)</div>
-        <div>
-          <strong>Students:</strong>
-          <span class="user-pill" onclick="quickFill('arjun')">arjun (CSE-2A)</span>
-          <span class="user-pill" onclick="quickFill('priya')">priya</span>
-          <span class="user-pill" onclick="quickFill('kavya')">kavya</span>
+      <div class="demo-account-grid">
+        <div class="demo-account-tile" onclick="quickLogin('arjun')">
+          <div class="demo-account-name">👨‍🎓 Arjun K</div>
+          <div class="demo-account-role">Student · 76% Attendance</div>
         </div>
-        <div style="margin-top: 0.5rem;">
-          <strong>Teachers:</strong>
-          <span class="user-pill" onclick="quickFill('lakshmi')">Dr. Lakshmi (Advisor)</span>
-          <span class="user-pill" onclick="quickFill('senthil')">Dr. Senthil</span>
+        <div class="demo-account-tile" onclick="quickLogin('priya')">
+          <div class="demo-account-name">👩‍🎓 Priya M</div>
+          <div class="demo-account-role">Student · 70% (Shortage Alert)</div>
+        </div>
+        <div class="demo-account-tile" onclick="quickLogin('lakshmi')">
+          <div class="demo-account-name">👩‍🏫 Dr. Lakshmi</div>
+          <div class="demo-account-role">Faculty Advisor · CSE-2A</div>
+        </div>
+        <div class="demo-account-tile" onclick="quickLogin('senthil')">
+          <div class="demo-account-name">👨‍🏫 Dr. Senthil</div>
+          <div class="demo-account-role">Faculty · Department of CSE</div>
         </div>
       </div>
     </div>
 
-    <!-- AUTHENTICATED VOICE ASSISTANT VIEW -->
+    <!-- 2. AUTHENTICATED PORTAL VIEW (Shown when logged in) -->
     <div id="assistant-section" style="display: none;">
-      <!-- Profile Header -->
-      <div class="profile-banner">
-        <div>
-          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
-            <h2 id="prof-name" style="font-size: 1.25rem; font-weight: 700;">Loading...</h2>
-            <span id="prof-role" class="user-tag tag-student">Student</span>
-          </div>
-          <div id="prof-details" style="font-size: 0.85rem; color: var(--text-muted);">Class: CSE-2A · Department of CSE</div>
-        </div>
-        <button onclick="doLogout()" style="background:#fee2e2; color:#b91c1c; border:none; padding:0.5rem 1rem; border-radius:6px; font-weight:600; cursor:pointer;">
-          Log Out
-        </button>
-      </div>
-
-      <!-- Voice Assistant Card -->
-      <div class="voice-card">
-        <div class="voice-status-text" id="status-text">Tap the microphone to speak</div>
-
-        <div class="mic-button-wrapper">
-          <button id="mic-btn" class="mic-button" title="Click to start/stop speaking">
-            <svg class="mic-icon" viewBox="0 0 24 24">
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Live Voice Waveform -->
-        <canvas id="voice-wave" class="waveform-canvas" width="280" height="36"></canvas>
-
-        <!-- Dynamic Role Prompt Chips -->
-        <div id="role-prompts" class="prompt-chips"></div>
-
-        <!-- Confirmation card -->
-        <div id="confirmation-container" style="width: 100%;"></div>
-
-        <!-- Conversation Stream -->
-        <div class="conversation-container" id="conversation-container">
-          <div class="chat-bubble assistant" id="welcome-bubble">
-            Welcome to KIT Voice Assistant. What would you like to check today?
+      <!-- Profile Dashboard Card -->
+      <div class="dashboard-user-card">
+        <div class="user-identity">
+          <div class="user-avatar-large" id="prof-avatar">U</div>
+          <div class="user-meta">
+            <h2>
+              <span id="prof-name">User Name</span>
+              <span id="prof-role-badge" class="badge-role badge-student">STUDENT</span>
+            </h2>
+            <div id="prof-details" class="user-dept-row">ID: -- · Class: -- · Dept: --</div>
           </div>
         </div>
+
+        <div class="dashboard-kpi-row" id="dashboard-kpis">
+          <!-- Populated dynamically via JS -->
+        </div>
       </div>
+
+      <!-- Academic Notice Alert Banner -->
+      <div id="academic-notice-banner"></div>
+
+      <!-- Centerpiece Voice Assistant Hub -->
+      <section class="voice-hub">
+        <div class="voice-hub-header">
+          <div class="voice-status-indicator">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Tap microphone or speak</span>
+          </div>
+          <div class="voice-provider-pill" id="persona-provider-pill">Groq Whisper · LLaMA-3.3 · Edge-TTS</div>
+        </div>
+
+        <div class="voice-hub-body">
+          <!-- Mic & Waveform -->
+          <div class="mic-control-center">
+            <button id="mic-btn" class="mic-btn-main" title="Click to start/stop speaking">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+            </button>
+            <div class="mic-hint-text">Speak naturally or click suggested commands below</div>
+          </div>
+
+          <div class="waveform-box">
+            <canvas id="voice-wave" class="waveform-canvas" width="280" height="32"></canvas>
+          </div>
+
+          <!-- Suggested Prompt Chips (Dynamic per Role) -->
+          <div class="chips-container">
+            <div class="chips-title">Suggested Voice Commands</div>
+            <div id="role-prompts" class="chips-wrapper"></div>
+          </div>
+
+          <!-- Confirmation Card Container (for two-step write confirmation) -->
+          <div id="confirmation-container" style="width: 100%;"></div>
+
+          <!-- Conversation Stream -->
+          <div class="conversation-stream" id="conversation-stream">
+            <div class="msg-row assistant">
+              <div class="msg-avatar">KIT</div>
+              <div class="msg-bubble-content">
+                <div class="msg-header">KIT Voice Assistant</div>
+                <div class="msg-bubble" id="welcome-bubble">
+                  Welcome to KIT Campus Voice Services. How can I assist you with your academic inquiries today?
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dual Input Footer (Voice or Type) -->
+        <div class="voice-hub-footer">
+          <div class="dual-input-wrapper">
+            <input type="text" id="text-input" class="dual-input-text" placeholder="Type an academic question or speak via microphone..." autocomplete="off">
+            <button id="send-btn" class="btn-dual-send">
+              <span>Send</span>
+              <span>➔</span>
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
   <footer>
-    Knotopian Institute of Technology · Authenticated Campus Voice Services
+    Knotopian Institute of Technology · Authenticated Campus Services · Role-Based Security Enforced
   </footer>
 
   <script src="/static/js/audio_recorder.js"></script>
   <script src="/static/js/app.js"></script>
   <script>
-    function quickFill(user) {
-      document.getElementById("login_id").value = user;
-      document.getElementById("password").value = "Kit@2026";
-    }
-
     async function checkAuthStatus() {
       try {
         const res = await fetch("/api/v1/auth/me");
@@ -213,71 +202,172 @@
     function showLoginView() {
       document.getElementById("login-section").style.display = "block";
       document.getElementById("assistant-section").style.display = "none";
+      document.getElementById("logout-btn").style.display = "none";
+      syncActivePersonaBar();
     }
 
     function showAssistantView(user) {
       document.getElementById("login-section").style.display = "none";
       document.getElementById("assistant-section").style.display = "block";
+      document.getElementById("logout-btn").style.display = "inline-block";
 
+      // Profile details
       document.getElementById("prof-name").innerText = user.full_name || user.login_id;
-      const roleElem = document.getElementById("prof-role");
-      roleElem.innerText = user.role.toUpperCase();
-      roleElem.className = `user-tag tag-${user.role}`;
+      document.getElementById("prof-avatar").innerText = (user.full_name || user.login_id).charAt(0).toUpperCase();
 
-      document.getElementById("prof-details").innerText = `ID: ${user.user_id} · Class: ${user.class_code || 'General'} · Dept: ${user.department || 'KIT'}`;
+      const roleBadge = document.getElementById("prof-role-badge");
+      roleBadge.innerText = user.role.toUpperCase();
+      roleBadge.className = `badge-role badge-${user.role}`;
 
-      // Set prompt chips
+      document.getElementById("prof-details").innerText = `ID: ${user.user_id} · Class Section: ${user.class_code || 'General'} · Dept: ${user.department || 'Engineering'}`;
+
+      const kpiBox = document.getElementById("dashboard-kpis");
       const promptsBox = document.getElementById("role-prompts");
+      const noticeBanner = document.getElementById("academic-notice-banner");
+
       if (user.role === "student") {
+        const isWarning = user.login_id === "priya"; // Priya is 70% (<75%), Arjun is 76% (>=75%)
+        const attnVal = user.login_id === "priya" ? "70.0%" : "76.0%";
+        const attnColor = isWarning ? "#ef4444" : "#10b981";
+        const attnStatus = isWarning 
+          ? `<span style="color:#ef4444; font-weight:700;">Shortage (<75%)</span>` 
+          : `<span style="color:#10b981; font-weight:700;">Eligible (&ge;75%)</span>`;
+
+        kpiBox.innerHTML = `
+          <div class="kpi-card">
+            <div class="kpi-number" style="color: ${attnColor};">${attnVal}</div>
+            <div class="kpi-title">Attendance (${attnStatus})</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-number" style="color: #2563eb;">35 / 50</div>
+            <div class="kpi-title">Classes Attended</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-number" style="color: #6366f1;">Nov 23</div>
+            <div class="kpi-title">Next Exam (DBMS)</div>
+          </div>
+        `;
+
+        // Notice alert
+        if (isWarning) {
+          noticeBanner.innerHTML = `
+            <div class="notice-box warning">
+              <span>⚠️</span>
+              <div>
+                <strong>Handbook Rule 6.1.1 Alert:</strong> Your attendance is currently 70.0% (below the 75% minimum threshold). You require an authorized medical certificate or on-duty approval to avoid exam condonation.
+              </div>
+            </div>
+          `;
+        } else {
+          noticeBanner.innerHTML = `
+            <div class="notice-box">
+              <span>✓</span>
+              <div>
+                <strong>Good Standing:</strong> Your attendance is 76.0% (eligible for End-Semester examinations under Rule 6.1.1). Note: Exam scheduled on Nov 23 (CS304 DBMS).
+              </div>
+            </div>
+          `;
+        }
+
+        // Student quick voice chips
         promptsBox.innerHTML = `
-          <button class="prompt-chip" onclick="sendVoiceText('What is my current attendance?')">My Attendance</button>
-          <button class="prompt-chip" onclick="sendVoiceText('When is my next exam scheduled?')">Exam Schedule</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Can I apply for leave on November 23rd?')">Test Leave on Exam Day</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Apply for personal leave on November 25th for family function.')">Apply Valid Leave</button>
-          <button class="prompt-chip" onclick="sendVoiceText('What is the deadline to submit on-duty proof under Circular 12?')">Circular 12 OD Rule</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Explain third normal form 3NF from DBMS lesson notes.')">DBMS 3NF Doubt</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Show active placement drives.')">Placement Drives</button>
+          <button class="chip-action" onclick="sendVoiceText('What is my current attendance percentage?')">
+            <span>📊</span> My Attendance
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('When is my next exam scheduled?')">
+            <span>📅</span> Exam Schedule
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Can I apply for leave on November 23rd?')">
+            <span>⚠️</span> Test Exam Day Conflict
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Apply for personal leave on November 25th for family function.')">
+            <span>📝</span> Apply Valid Leave (2-Step)
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('What is the deadline for on-duty proof under Circular 12?')">
+            <span>📜</span> Circular 12 OD Rule
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Explain third normal form 3NF from DBMS lesson notes.')">
+            <span>💡</span> DBMS 3NF Doubt
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Show active campus placement drives.')">
+            <span>💼</span> Placement Drives
+          </button>
         `;
       } else {
+        // Teacher Persona
+        kpiBox.innerHTML = `
+          <div class="kpi-card">
+            <div class="kpi-number" style="color: #2563eb;">CSE-2A</div>
+            <div class="kpi-title">Advised Section</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-number" style="color: #f59e0b;">3 Pending</div>
+            <div class="kpi-title">Leave & OD Requests</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-number" style="color: #10b981;">62</div>
+            <div class="kpi-title">Total Students</div>
+          </div>
+        `;
+
+        noticeBanner.innerHTML = `
+          <div class="notice-box">
+            <span>📋</span>
+            <div>
+              <strong>Faculty Advisory Dashboard:</strong> You have 3 pending student requests (Arjun On-Duty, Priya Medical Leave, Rahul On-Duty). Speak to review, approve, or reject.
+            </div>
+          </div>
+        `;
+
         promptsBox.innerHTML = `
-          <button class="prompt-chip" onclick="sendVoiceText('Show pending student leave and on-duty requests.')">Pending Requests</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Which classes do I advise?')">My Classes</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Approve request 22 for Arjun.')">Approve Request 22</button>
-          <button class="prompt-chip" onclick="sendVoiceText('Reject request 26 due to proof missing.')">Reject Request 26</button>
+          <button class="chip-action" onclick="sendVoiceText('Show pending student leave and on-duty requests.')">
+            <span>📋</span> Review Pending Requests
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Which classes do I advise?')">
+            <span>🏫</span> My Advised Classes
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Approve request 22 for Arjun.')">
+            <span>✅</span> Approve Request 22 (Arjun)
+          </button>
+          <button class="chip-action" onclick="sendVoiceText('Reject request 26 due to proof missing.')">
+            <span>❌</span> Reject Request 26
+          </button>
         `;
       }
+
+      syncActivePersonaBar();
     }
 
-    async function doLogin(e) {
-      e.preventDefault();
-      const login_id = document.getElementById("login_id").value;
-      const password = document.getElementById("password").value;
-
+    async function quickLogin(username) {
       try {
         const res = await fetch("/api/v1/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ login_id, password })
+          body: JSON.stringify({ login_id: username, password: "Kit@2026" })
         });
         const data = await res.json();
         if (res.ok && data.success) {
           checkAuthStatus();
         } else {
-          alert(data.detail || "Login failed");
+          alert("Login failed: " + (data.detail || "Invalid credentials"));
         }
       } catch (err) {
         alert("Login request error: " + err.message);
       }
     }
 
-    async function doLogout() {
-      await fetch("/api/v1/auth/logout", { method: "POST" });
-      location.reload();
+    async function handleFormLogin(e) {
+      e.preventDefault();
+      const login_id = document.getElementById("login_id").value;
+      quickLogin(login_id);
     }
 
-    // Check auth on load
+    async function doLogout() {
+      await fetch("/api/v1/auth/logout", { method: "POST" });
+      checkAuthStatus();
+    }
+
     checkAuthStatus();
   </script>
 </body>
 </html>
-

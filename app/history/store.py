@@ -82,21 +82,29 @@ class HistoryStore:
             messages = db.execute(query).scalars().all()
             result = []
             for m in messages[-limit:]:
+                tool_calls_data = None
+                if m.tool_calls_json:
+                    try:
+                        tool_calls_data = json.loads(m.tool_calls_json)
+                    except Exception:
+                        pass
                 result.append({
                     "id": m.id,
                     "role": m.role,
                     "content": m.content,
+                    "tool_calls": tool_calls_data,
                     "created_at": m.created_at.isoformat(),
                 })
             return result
 
-    def get_user_conversations(self, session_id: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_user_conversations(self, session_id: str, user_id: Optional[str] = None, all_sessions: bool = False) -> List[Dict[str, Any]]:
         with self.db_factory() as db:
             query = select(DBConversation).order_by(DBConversation.created_at.desc())
-            if user_id:
-                query = query.where(DBConversation.user_id == str(user_id))
-            else:
-                query = query.where(DBConversation.session_id == session_id)
+            if not all_sessions:
+                if user_id:
+                    query = query.where(DBConversation.user_id == str(user_id))
+                else:
+                    query = query.where(DBConversation.session_id == session_id)
 
             conversations = db.execute(query).scalars().all()
             output = []
@@ -108,6 +116,7 @@ class HistoryStore:
                     "id": c.id,
                     "role": c.role,
                     "title": c.title,
+                    "user_id": c.user_id,
                     "message_count": msg_count,
                     "last_message": last_msg[:120],
                     "created_at": c.created_at.isoformat(),

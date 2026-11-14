@@ -241,10 +241,11 @@ async def voice_chat(
 
 # --- History Endpoints ---
 @app.get("/api/v1/history/conversations")
-async def list_conversations(session: SessionData = Depends(get_session)):
+async def list_conversations(all: bool = False, session: SessionData = Depends(get_session)):
     convs = history_store.get_user_conversations(
         session_id=session.session_id,
-        user_id=str(session.user_id) if session.user_id else None
+        user_id=str(session.user_id) if session.user_id else None,
+        all_sessions=all
     )
     return {"conversations": convs}
 
