@@ -27,67 +27,55 @@
     </nav>
   </header>
 
-  <!-- Demo Persona Switcher Bar (Instant Evaluator Switching) -->
-  <div class="demo-switcher-bar">
-    <div class="switcher-left">
-      <span class="switcher-tag">⚡ Instant Personas:</span>
-      <button class="switcher-btn" id="demo-public" onclick="doLogoutAndRedirect()">
-        🌐 Exit to Public Mode
-      </button>
-      <button class="switcher-btn" id="demo-arjun" onclick="quickLogin('arjun')">
-        👨‍🎓 Arjun (Student 76%)
-      </button>
-      <button class="switcher-btn" id="demo-priya" onclick="quickLogin('priya')">
-        👩‍🎓 Priya (Student 70% Alert)
-      </button>
-      <button class="switcher-btn" id="demo-lakshmi" onclick="quickLogin('lakshmi')">
-        👩‍🏫 Dr. Lakshmi (Advisor CSE-2A)
-      </button>
-      <button class="switcher-btn" id="demo-senthil" onclick="quickLogin('senthil')">
-        👨‍🏫 Dr. Senthil (Faculty)
-      </button>
-    </div>
-    <div class="switcher-right-note">
-      <a href="/history" style="color:#2563eb; font-weight:700; text-decoration:none;">View My Session Voice History &rarr;</a>
-    </div>
-  </div>
-
   <main>
     <!-- 1. LOGIN SECTION (Shown when unauthenticated) -->
     <div id="login-section" class="portal-card-sso" style="display: none;">
       <h2 class="sso-title">Campus Single Sign-On</h2>
-      <p class="sso-subtitle">Sign in to access your attendance, timetable, leave submissions, or teacher approvals.</p>
+      <p class="sso-subtitle">
+        Enter your student or faculty credentials to access attendance, exam calendars, leave requests, or advisory approvals.
+      </p>
 
       <form id="login-form" onsubmit="handleFormLogin(event)">
         <div style="margin-bottom: 1.25rem;">
-          <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">Login ID / Username</label>
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">
+            Username / Login ID
+          </label>
           <input type="text" id="login_id" class="dual-input-text" style="width:100%; border-radius:8px;" placeholder="e.g. arjun or lakshmi" required>
         </div>
         <div style="margin-bottom: 1.5rem;">
-          <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">Password</label>
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">
+            Password
+          </label>
           <input type="password" id="password" class="dual-input-text" style="width:100%; border-radius:8px;" value="Kit@2026" required>
         </div>
-        <button type="submit" class="btn-dual-send" style="width:100%; justify-content:center; padding:0.85rem; border-radius:8px;">
+        <button type="submit" id="login-submit-btn" class="btn-dual-send" style="width:100%; justify-content:center; padding:0.85rem; border-radius:8px;">
           Sign In to Campus Portal
         </button>
       </form>
 
-      <div class="demo-account-grid">
-        <div class="demo-account-tile" onclick="quickLogin('arjun')">
-          <div class="demo-account-name">👨‍🎓 Arjun K</div>
-          <div class="demo-account-role">Student · 76% Attendance</div>
+      <!-- Testing Reference Accounts (Pre-fills credentials on click for convenience) -->
+      <div class="test-creds-container">
+        <div class="test-creds-header">
+          <span>Demo Test Accounts</span>
+          <span>Password: <strong>Kit@2026</strong></span>
         </div>
-        <div class="demo-account-tile" onclick="quickLogin('priya')">
-          <div class="demo-account-name">👩‍🎓 Priya M</div>
-          <div class="demo-account-role">Student · 70% (Shortage Alert)</div>
-        </div>
-        <div class="demo-account-tile" onclick="quickLogin('lakshmi')">
-          <div class="demo-account-name">👩‍🏫 Dr. Lakshmi</div>
-          <div class="demo-account-role">Faculty Advisor · CSE-2A</div>
-        </div>
-        <div class="demo-account-tile" onclick="quickLogin('senthil')">
-          <div class="demo-account-name">👨‍🏫 Dr. Senthil</div>
-          <div class="demo-account-role">Faculty · Department of CSE</div>
+        <div class="creds-list">
+          <div class="cred-row" onclick="fillCredentials('arjun')">
+            <span class="cred-user">👨‍🎓 arjun</span>
+            <span class="cred-meta">Student · 76% Attendance (Eligible)</span>
+          </div>
+          <div class="cred-row" onclick="fillCredentials('priya')">
+            <span class="cred-user">👩‍🎓 priya</span>
+            <span class="cred-meta">Student · 70% Attendance (Shortage Alert)</span>
+          </div>
+          <div class="cred-row" onclick="fillCredentials('lakshmi')">
+            <span class="cred-user">👩‍🏫 lakshmi</span>
+            <span class="cred-meta">Faculty Advisor · CSE-2A (3 Pending Approvals)</span>
+          </div>
+          <div class="cred-row" onclick="fillCredentials('senthil')">
+            <span class="cred-user">👨‍🏫 senthil</span>
+            <span class="cred-meta">Faculty · Department of CSE</span>
+          </div>
         </div>
       </div>
     </div>
@@ -203,7 +191,12 @@
       document.getElementById("login-section").style.display = "block";
       document.getElementById("assistant-section").style.display = "none";
       document.getElementById("logout-btn").style.display = "none";
-      syncActivePersonaBar();
+    }
+
+    function fillCredentials(username) {
+      document.getElementById("login_id").value = username;
+      document.getElementById("password").value = "Kit@2026";
+      document.getElementById("login_id").focus();
     }
 
     function showAssistantView(user) {
@@ -254,7 +247,7 @@
             <div class="notice-box warning">
               <span>⚠️</span>
               <div>
-                <strong>Handbook Rule 6.1.1 Alert:</strong> Your attendance is currently 70.0% (below the 75% minimum threshold). You require an authorized medical certificate or on-duty approval to avoid exam condonation.
+                <strong>Handbook Rule 6.1.1 Alert:</strong> Your attendance is currently 70.0% (below the 75% minimum threshold). You require authorized medical or on-duty approval to avoid exam condonation.
               </div>
             </div>
           `;
@@ -263,7 +256,7 @@
             <div class="notice-box">
               <span>✓</span>
               <div>
-                <strong>Good Standing:</strong> Your attendance is 76.0% (eligible for End-Semester examinations under Rule 6.1.1). Note: Exam scheduled on Nov 23 (CS304 DBMS).
+                <strong>Good Standing:</strong> Your attendance is 76.0% (eligible for End-Semester examinations under Rule 6.1.1). Note: Internal exam on Nov 23 (CS304 DBMS).
               </div>
             </div>
           `;
@@ -334,32 +327,35 @@
           </button>
         `;
       }
-
-      syncActivePersonaBar();
     }
 
-    async function quickLogin(username) {
+    async function handleFormLogin(e) {
+      e.preventDefault();
+      const login_id = document.getElementById("login_id").value.trim();
+      const password = document.getElementById("password").value;
+      const submitBtn = document.getElementById("login-submit-btn");
+
+      submitBtn.innerText = "Signing in...";
+      submitBtn.disabled = true;
+
       try {
         const res = await fetch("/api/v1/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ login_id: username, password: "Kit@2026" })
+          body: JSON.stringify({ login_id: login_id, password: password })
         });
         const data = await res.json();
         if (res.ok && data.success) {
           checkAuthStatus();
         } else {
-          alert("Login failed: " + (data.detail || "Invalid credentials"));
+          alert("Authentication Failed: " + (data.detail || "Invalid login credentials"));
         }
       } catch (err) {
         alert("Login request error: " + err.message);
+      } finally {
+        submitBtn.innerText = "Sign In to Campus Portal";
+        submitBtn.disabled = false;
       }
-    }
-
-    async function handleFormLogin(e) {
-      e.preventDefault();
-      const login_id = document.getElementById("login_id").value;
-      quickLogin(login_id);
     }
 
     async function doLogout() {

@@ -284,25 +284,7 @@ if (sendBtn && textInput) {
   });
 }
 
-// Unified Persona Switcher & Authentication Helpers
-async function quickLoginAndRedirect(username) {
-  try {
-    const res = await fetch("/api/v1/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ login_id: username, password: "Kit@2026" })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      window.location.href = "/portal";
-    } else {
-      alert("Login failed: " + (data.detail || "Invalid credentials"));
-    }
-  } catch (err) {
-    alert("Login request error: " + err.message);
-  }
-}
-
+// Header Authentication State Sync
 async function doLogoutAndRedirect() {
   try {
     await fetch("/api/v1/auth/logout", { method: "POST" });
@@ -310,37 +292,30 @@ async function doLogoutAndRedirect() {
   window.location.href = "/";
 }
 
-// Highlight active persona in demo bar
-async function syncActivePersonaBar() {
+async function syncHeaderAuthState() {
   try {
     const res = await fetch("/api/v1/auth/me");
     const data = await res.json();
-    
-    // Highlight button in demo switcher bar
-    const pills = document.querySelectorAll(".switcher-btn");
-    pills.forEach(p => p.classList.remove("active-persona"));
+
+    const headerUser = document.getElementById("header-user-badge");
+    const loginBtn = document.getElementById("header-login-btn");
 
     if (data.authenticated) {
-      const activeBtn = document.getElementById(`demo-${data.login_id}`);
-      if (activeBtn) activeBtn.classList.add("active-persona");
-
-      const headerUser = document.getElementById("header-user-badge");
       if (headerUser) {
         headerUser.style.display = "flex";
         headerUser.innerHTML = `<span class="dot-live"></span> ${data.full_name || data.login_id} (${data.role.toUpperCase()})`;
       }
 
-      const loginBtn = document.getElementById("header-login-btn");
       if (loginBtn) {
         loginBtn.innerText = "Log Out";
         loginBtn.className = "btn-header-action btn-header-logout";
         loginBtn.onclick = (e) => { e.preventDefault(); doLogoutAndRedirect(); };
       }
     } else {
-      const publicBtn = document.getElementById("demo-public");
-      if (publicBtn) publicBtn.classList.add("active-persona");
+      if (headerUser) {
+        headerUser.style.display = "none";
+      }
 
-      const loginBtn = document.getElementById("header-login-btn");
       if (loginBtn) {
         loginBtn.innerText = "Portal Login";
         loginBtn.className = "btn-header-action btn-header-login";
@@ -350,4 +325,4 @@ async function syncActivePersonaBar() {
   } catch (err) {}
 }
 
-document.addEventListener("DOMContentLoaded", syncActivePersonaBar);
+document.addEventListener("DOMContentLoaded", syncHeaderAuthState);

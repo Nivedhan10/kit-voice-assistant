@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <!-- Header Bar -->
+  <!-- University Header Bar -->
   <header>
     <a href="/" class="brand">
       <div class="brand-logo">KIT</div>
@@ -25,41 +25,21 @@
     </nav>
   </header>
 
-  <!-- Demo Persona Switcher Bar (Instant Evaluator Switching) -->
-  <div class="demo-switcher-bar">
-    <div class="switcher-left">
-      <span class="switcher-tag">⚡ Switch History User:</span>
-      <button class="switcher-btn" id="demo-public" onclick="doLogoutAndRedirect()">
-        🌐 Public Guest
-      </button>
-      <button class="switcher-btn" id="demo-arjun" onclick="quickLoginAndRedirect('arjun')">
-        👨‍🎓 Arjun (Student)
-      </button>
-      <button class="switcher-btn" id="demo-priya" onclick="quickLoginAndRedirect('priya')">
-        👩‍🎓 Priya (Student)
-      </button>
-      <button class="switcher-btn" id="demo-lakshmi" onclick="quickLoginAndRedirect('lakshmi')">
-        👩‍🏫 Dr. Lakshmi (Faculty)
-      </button>
-      <button class="switcher-btn" id="demo-senthil" onclick="quickLoginAndRedirect('senthil')">
-        👨‍🏫 Dr. Senthil (Faculty)
-      </button>
-    </div>
-    <div class="switcher-right-note">
-      <button onclick="toggleAllSessions()" id="btn-toggle-all" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:0.35rem 0.75rem; border-radius:12px; font-weight:700; font-size:0.78rem; cursor:pointer;">
-        🔍 Show All Campus Sessions
-      </button>
-    </div>
-  </div>
-
   <main>
-    <div style="margin-bottom: 1.5rem;">
-      <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--brand-navy); letter-spacing: -0.02em;">
-        Conversation History & Voice Audit Logs
-      </h1>
-      <p style="color: var(--text-muted); font-size: 0.92rem;">
-        Complete chronological transcripts and tool invocation records for your voice sessions.
-      </p>
+    <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--brand-navy); letter-spacing: -0.02em;">
+          Conversation History & Audit Logs
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          Complete chronological transcripts and executed tool actions stored securely in the database.
+        </p>
+      </div>
+      <div>
+        <button onclick="toggleAllSessions()" id="btn-toggle-all" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:0.45rem 0.95rem; border-radius:var(--radius-full); font-weight:700; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;">
+          🔍 View All Campus Logs
+        </button>
+      </div>
     </div>
 
     <div class="history-container-box">
@@ -67,7 +47,7 @@
       <div class="history-sidebar-pane">
         <div class="history-sidebar-header">
           <span id="session-count-label">Recorded Sessions</span>
-          <span style="font-size:0.7rem; color:#2563eb; font-weight:700;" id="filter-mode-tag">User Sessions</span>
+          <span style="font-size:0.7rem; color:#2563eb; font-weight:700;" id="filter-mode-tag">My Session</span>
         </div>
         <div class="history-session-list" id="conv-items">
           <div style="font-size:0.85rem; color:#64748b; padding:1rem; text-align:center;">Loading sessions...</div>
@@ -84,7 +64,7 @@
   </main>
 
   <footer>
-    Knotopian Institute of Technology · Conversation Audit Logs & Persistence Layer (SQLAlchemy)
+    Knotopian Institute of Technology · Conversation Audit Logs & Persistence Layer (SQLAlchemy 2.0)
   </footer>
 
   <script src="/static/js/app.js"></script>
@@ -97,11 +77,11 @@
       const btn = document.getElementById("btn-toggle-all");
       const tag = document.getElementById("filter-mode-tag");
       if (showingAll) {
-        btn.innerText = "👤 Show Only My Sessions";
+        btn.innerText = "👤 Show Only My Session";
         tag.innerText = "All Campus Logs";
       } else {
-        btn.innerText = "🔍 Show All Campus Sessions";
-        tag.innerText = "User Sessions";
+        btn.innerText = "🔍 View All Campus Logs";
+        tag.innerText = "My Session";
       }
       loadConversations();
     }
@@ -115,12 +95,12 @@
         const countLabel = document.getElementById("session-count-label");
 
         if (!data.conversations || data.conversations.length === 0) {
-          container.innerHTML = "<div style='font-size:0.85rem; color:#64748b; padding:1rem; text-align:center;'>No past conversations found.</div>";
+          container.innerHTML = "<div style='font-size:0.85rem; color:#64748b; padding:1.5rem; text-align:center;'>No past conversations recorded yet.</div>";
           countLabel.innerText = "Recorded Sessions (0)";
           document.getElementById("messages-container").innerHTML = `
             <div style="color: var(--text-muted); text-align: center; margin-top: 5rem;">
-              No recorded voice conversations yet for this account.<br>
-              <a href="/portal" style="color:#2563eb; font-weight:700;">Open Portal to start a voice interaction &rarr;</a>
+              No voice interactions recorded yet.<br>
+              <a href="/portal" style="color:#2563eb; font-weight:700; text-decoration:none;">Open Campus Portal to speak with assistant &rarr;</a>
             </div>
           `;
           return;
@@ -135,7 +115,7 @@
 
           const roleClass = conv.role === "teacher" ? "badge-teacher" : "badge-student";
           const roleLabel = (conv.role || "public").toUpperCase();
-          const userSuffix = conv.user_id ? ` (ID: ${conv.user_id})` : "";
+          const userSuffix = conv.user_id ? ` · User #${conv.user_id}` : "";
 
           item.innerHTML = `
             <div class="session-card-top">
@@ -202,7 +182,7 @@
             msg.tool_calls.forEach(tc => {
               const toolPill = document.createElement("div");
               toolPill.className = "tool-action-pill";
-              toolPill.innerText = `🔧 Action Executed: ${tc.tool_name || 'System Query'}`;
+              toolPill.innerText = `🔧 Tool Executed: ${tc.tool_name || 'System Query'}`;
               contentCol.appendChild(toolPill);
             });
           }

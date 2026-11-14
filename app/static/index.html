@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <!-- Header Bar -->
+  <!-- University Header Bar -->
   <header>
     <a href="/" class="brand">
       <div class="brand-logo">KIT</div>
@@ -25,54 +25,41 @@
     </nav>
   </header>
 
-  <!-- Demo Persona Switcher Bar (For Seamless Evaluator Testing) -->
-  <div class="demo-switcher-bar">
-    <div class="switcher-left">
-      <span class="switcher-tag">⚡ Demo Switcher:</span>
-      <button class="switcher-btn active-persona" id="demo-public" onclick="location.href='/'">
-        🌐 Public Guest
-      </button>
-      <button class="switcher-btn" id="demo-arjun" onclick="quickLoginAndRedirect('arjun')">
-        👨‍🎓 Arjun (Student 76%)
-      </button>
-      <button class="switcher-btn" id="demo-priya" onclick="quickLoginAndRedirect('priya')">
-        👩‍🎓 Priya (Student 70% Alert)
-      </button>
-      <button class="switcher-btn" id="demo-lakshmi" onclick="quickLoginAndRedirect('lakshmi')">
-        👩‍🏫 Dr. Lakshmi (Faculty Advisor)
-      </button>
-      <button class="switcher-btn" id="demo-senthil" onclick="quickLoginAndRedirect('senthil')">
-        👨‍🏫 Dr. Senthil (Faculty)
-      </button>
-    </div>
-    <div class="switcher-right-note">
-      🔒 Mode: <strong>Public Admissions</strong> (Student Data Strictly Isolated)
-    </div>
-  </div>
-
   <main>
     <!-- Hero Banner -->
     <section class="hero-box">
       <div class="hero-chip-live">
         <span>🎙️</span>
-        <span>AICTE Approved · Autonomous · Real-Time Spoken AI</span>
+        <span>AICTE Approved · Autonomous Engineering Institution · Real-Time Spoken AI</span>
       </div>
       <h1 class="hero-title">
-        Excellence in Engineering & <span>Applied Artificial Intelligence</span>
+        Pioneering Engineering & <span>Applied Artificial Intelligence</span>
       </h1>
       <p class="hero-desc">
-        Welcome to Knotopian Institute of Technology. Talk directly with our voice assistant for degree options, cutoff criteria, tuition fees, or to submit your admission application.
+        Welcome to Knotopian Institute of Technology (KIT). Empowering next-generation engineers through autonomous academic excellence. Talk directly with our 24/7 Voice Admissions Assistant to explore programs, cutoff eligibility, campus facilities, or to submit your admission application.
       </p>
+
+      <div class="hero-actions-row">
+        <a href="#voice-hub-section" class="btn-hero-primary">
+          <span>🎙️</span>
+          <span>Speak with Admissions AI</span>
+        </a>
+        <a href="#programmes-section" class="btn-hero-secondary">
+          <span>📚</span>
+          <span>Explore B.Tech Programmes</span>
+        </a>
+      </div>
+
       <div class="hero-stats-ribbon">
         <div class="stat-pill"><strong>98.4%</strong> Placement Rate</div>
+        <div class="stat-pill"><strong>₹42 LPA</strong> Highest Tech Package</div>
         <div class="stat-pill"><strong>120+</strong> Research Labs & Patents</div>
-        <div class="stat-pill"><strong>Top 10</strong> Autonomous Ranking</div>
-        <div class="stat-pill"><strong>0ms</strong> Real-Time Spoken AI</div>
+        <div class="stat-pill"><strong>Autonomous</strong> Industry Curriculum</div>
       </div>
     </section>
 
     <!-- Centerpiece Voice Assistant Hub -->
-    <section class="voice-hub">
+    <section class="voice-hub" id="voice-hub-section">
       <div class="voice-hub-header">
         <div class="voice-status-indicator">
           <div class="status-dot" id="status-dot"></div>
@@ -90,7 +77,7 @@
               <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
             </svg>
           </button>
-          <div class="mic-hint-text">Tap microphone or click suggested inquiries</div>
+          <div class="mic-hint-text">Tap microphone or click suggested inquiries below</div>
         </div>
 
         <div class="waveform-box">
@@ -129,7 +116,7 @@
             <div class="msg-bubble-content">
               <div class="msg-header">KIT Admissions Voice Assistant</div>
               <div class="msg-bubble">
-                Hello! Welcome to Knotopian Institute of Technology. I am your real-time admissions assistant. How can I help you explore our engineering programs or submit an application today?
+                Hello! Welcome to Knotopian Institute of Technology. I am your real-time spoken admissions assistant. How can I help you explore our degree programmes, eligibility cutoffs, or submit your admission application today?
               </div>
             </div>
           </div>
@@ -149,21 +136,25 @@
     </section>
 
     <!-- Academic Programmes Section -->
-    <section>
+    <section id="programmes-section">
       <div class="courses-section-header">
+        <div class="section-eyebrow">Academic Offerings</div>
         <h2>Undergraduate Engineering Programmes (B.Tech)</h2>
-        <p>Four-year professional degree programmes approved by AICTE and government technical boards.</p>
+        <p>Four-year professional degree programmes combining rigorous theoretical fundamentals with state-of-the-art laboratory practice.</p>
       </div>
 
       <div class="courses-grid-modern">
         <div class="course-card-modern">
           <span class="course-badge-seats">BTECH-CSE · 120 SEATS</span>
           <div class="course-name-title">Computer Science & Engineering</div>
+          <div class="course-desc-brief">
+            Focuses on Artificial Intelligence, Machine Learning, Cloud Distributed Systems, High-Performance Computing, and Full-Stack Engineering.
+          </div>
           <div class="course-info-list">
-            <div class="course-info-item"><span>12th Min Eligibility:</span><strong>75.0% Aggregate</strong></div>
+            <div class="course-info-item"><span>12th Min Cutoff:</span><strong>75.0% Aggregate (PCM)</strong></div>
             <div class="course-info-item"><span>Annual Tuition Fee:</span><strong>₹1,25,000 / year</strong></div>
             <div class="course-info-item"><span>Hostel & Mess:</span><strong>₹60,000 / year</strong></div>
-            <div class="course-info-item"><span>Department:</span><strong>CSE (AI & Systems)</strong></div>
+            <div class="course-info-item"><span>Average Placement:</span><strong>₹14.2 LPA</strong></div>
           </div>
           <button class="btn-course-inquire" onclick="sendVoiceText('What is the eligibility and annual fee for Computer Science?')">
             <span>🎙️</span> Inquire About B.Tech CSE
@@ -173,11 +164,14 @@
         <div class="course-card-modern">
           <span class="course-badge-seats">BTECH-ECE · 60 SEATS</span>
           <div class="course-name-title">Electronics & Communication</div>
+          <div class="course-desc-brief">
+            Specialized curriculum in VLSI Design, Embedded Microcontrollers, Robotics, Digital Signal Processing, and Wireless Communications.
+          </div>
           <div class="course-info-list">
-            <div class="course-info-item"><span>12th Min Eligibility:</span><strong>70.0% Aggregate</strong></div>
+            <div class="course-info-item"><span>12th Min Cutoff:</span><strong>70.0% Aggregate (PCM)</strong></div>
             <div class="course-info-item"><span>Annual Tuition Fee:</span><strong>₹1,10,000 / year</strong></div>
             <div class="course-info-item"><span>Hostel & Mess:</span><strong>₹60,000 / year</strong></div>
-            <div class="course-info-item"><span>Department:</span><strong>ECE (VLSI & Embedded)</strong></div>
+            <div class="course-info-item"><span>Average Placement:</span><strong>₹11.6 LPA</strong></div>
           </div>
           <button class="btn-course-inquire" onclick="sendVoiceText('Tell me about the Electronics and Communication Engineering program.')">
             <span>🎙️</span> Inquire About B.Tech ECE
@@ -187,15 +181,92 @@
         <div class="course-card-modern">
           <span class="course-badge-seats">BTECH-MECH · 60 SEATS</span>
           <div class="course-name-title">Mechanical Engineering</div>
+          <div class="course-desc-brief">
+            Modern mechanical engineering integrating Smart Manufacturing, Industrial Robotics, CAD/CAM/CAE, and Sustainable Energy Technologies.
+          </div>
           <div class="course-info-list">
-            <div class="course-info-item"><span>12th Min Eligibility:</span><strong>60.0% Aggregate</strong></div>
+            <div class="course-info-item"><span>12th Min Cutoff:</span><strong>60.0% Aggregate (PCM)</strong></div>
             <div class="course-info-item"><span>Annual Tuition Fee:</span><strong>₹95,000 / year</strong></div>
             <div class="course-info-item"><span>Hostel & Mess:</span><strong>₹55,000 / year</strong></div>
-            <div class="course-info-item"><span>Department:</span><strong>MECH (Robotics & CAD)</strong></div>
+            <div class="course-info-item"><span>Average Placement:</span><strong>₹9.4 LPA</strong></div>
           </div>
           <button class="btn-course-inquire" onclick="sendVoiceText('What are the fees and eligibility for Mechanical Engineering?')">
             <span>🎙️</span> Inquire About B.Tech MECH
           </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Choose KIT Section -->
+    <section>
+      <div class="courses-section-header">
+        <div class="section-eyebrow">Institutional Excellence</div>
+        <h2>Why Knotopian Institute of Technology?</h2>
+        <p>A world-class engineering ecosystem built for innovative research, premier tech placements, and holistic student development.</p>
+      </div>
+
+      <div class="marketing-grid">
+        <div class="feature-box">
+          <div class="feature-icon-circle">🏆</div>
+          <div class="feature-title">Autonomous Curriculum</div>
+          <div class="feature-text">
+            Syllabus designed in direct collaboration with tech industry leaders, updated every academic cycle to reflect real-world technologies.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-circle">💼</div>
+          <div class="feature-title">Elite Placement Cell</div>
+          <div class="feature-text">
+            Over 450+ multinational recruiting partners including Google, Microsoft, Amazon, Zoho, and Tier-1 product startups visiting campus.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-circle">🔬</div>
+          <div class="feature-title">State-of-the-Art Labs</div>
+          <div class="feature-text">
+            Advanced NVIDIA AI computing clusters, VLSI clean labs, 3D printing maker-spaces, and high-speed campus-wide fiber network.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-circle">🎙️</div>
+          <div class="feature-title">AI-Powered Smart Campus</div>
+          <div class="feature-text">
+            First campus in the region with autonomous spoken voice assistants for attendance, exam schedules, and academic workflows.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step-by-Step Admissions Process -->
+    <section class="timeline-card">
+      <div class="timeline-header">
+        <h2>Admissions 2026 — 4 Simple Steps</h2>
+        <p>From initial inquiry to confirmed enrollment, our admissions process is fast and transparent.</p>
+      </div>
+
+      <div class="timeline-steps-row">
+        <div class="timeline-step">
+          <div class="step-num">Step 01</div>
+          <div class="step-title">Voice Consultation</div>
+          <div class="step-desc">Speak to our voice assistant or review department cutoffs and scholarship eligibility.</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-num">Step 02</div>
+          <div class="step-title">Submit Application</div>
+          <div class="step-desc">Provide applicant name, 12th marks, and program preference via voice or portal.</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-num">Step 03</div>
+          <div class="step-title">Document Review</div>
+          <div class="step-desc">Admissions committee verifies academic records and cutoff criteria within 24 hours.</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-num">Step 04</div>
+          <div class="step-title">Provisional Offer</div>
+          <div class="step-desc">Receive official provisional admission letter and seat reservation confirmation.</div>
         </div>
       </div>
     </section>
