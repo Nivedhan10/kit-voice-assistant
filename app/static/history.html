@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KIT Assistant — Conversation History</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .history-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 550px;
+      box-shadow: var(--shadow);
+    }
+    .history-sidebar {
+      border-right: 1px solid var(--border);
+      background: #f8fafc;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .history-item {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .history-item:hover, .history-item.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .history-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .history-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .history-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <div class="brand-logo">KIT</div>
+      <div>
+        <div class="brand-title">Knotopian Institute of Technology</div>
+        <div class="brand-subtitle">Voice Assistant Conversation Archive</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Home & Admissions</a>
+      <a href="/portal">Student & Teacher Portal</a>
+      <a href="/history" class="active">History</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem;">Conversation History</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+      Archived voice conversations and tool actions recorded for your session.
+    </p>
+
+    <div class="history-layout">
+      <!-- Sidebar of conversations -->
+      <div class="history-sidebar" id="conv-list">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase;">
+          Past Sessions
+        </div>
+        <div id="conv-items">Loading conversations...</div>
+      </div>
+
+      <!-- Messages list for selected conversation -->
+      <div class="history-content" id="messages-container">
+        <div style="color: var(--text-muted); text-align: center; margin-top: 3rem;">
+          Select a conversation from the left to view messages.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Knotopian Institute of Technology · Conversation Audit Logs & Persistence
+  </footer>
+
+  <script>
+    let activeConvId = null;
+
+    async function loadConversations() {
+      try {
+        const res = await fetch("/api/v1/history/conversations");
+        const data = await res.json();
+        const container = document.getElementById("conv-items");
+
+        if (!data.conversations || data.conversations.length === 0) {
+          container.innerHTML = "<div style='font-size:0.85rem; color:#64748b;'>No past conversations recorded yet.</div>";
+          return;
+        }
+
+        container.innerHTML = "";
+        data.conversations.forEach((conv, index) => {
+          const item = document.createElement("div");
+          item.className = "history-item" + (index === 0 ? " active" : "");
+          item.onclick = () => selectConversation(conv.id, item);
+          item.innerHTML = `
+            <div class="history-title">${conv.title}</div>
+            <div class="history-meta">${new Date(conv.created_at).toLocaleString()} · ${conv.message_count} messages</div>
+            <div style="font-size:0.8rem; color:#475569; margin-top:0.25rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${conv.last_message || ''}</div>
+          `;
+          container.appendChild(item);
+        });
+
+        // Automatically load first conversation
+        if (data.conversations.length > 0) {
+          selectConversation(data.conversations[0].id, container.children[0]);
+        }
+      } catch (err) {
+        console.error("Error loading conversations:", err);
+      }
+    }
+
+    async function selectConversation(convId, element) {
+      activeConvId = convId;
+      document.querySelectorAll(".history-item").forEach(el => el.classList.remove("active"));
+      if (element) element.classList.add("active");
+
+      const msgContainer = document.getElementById("messages-container");
+      msgContainer.innerHTML = "<div style='color:#64748b; text-align:center;'>Loading messages...</div>";
+
+      try {
+        const res = await fetch(`/api/v1/history/conversations/${convId}`);
+        const data = await res.json();
+
+        msgContainer.innerHTML = "";
+        if (!data.messages || data.messages.length === 0) {
+          msgContainer.innerHTML = "<div style='color:#64748b;'>No messages in this session.</div>";
+          return;
+        }
+
+        data.messages.forEach(msg => {
+          const bubble = document.createElement("div");
+          bubble.className = `chat-bubble ${msg.role}`;
+          bubble.innerHTML = `
+            <div style="font-size:0.75rem; font-weight:700; margin-bottom:0.2rem; opacity:0.8;">${msg.role.toUpperCase()}</div>
+            <div>${msg.content}</div>
+          `;
+          msgContainer.appendChild(bubble);
+        });
+      } catch (err) {
+        msgContainer.innerHTML = "<div style='color:red;'>Failed to load messages.</div>";
+      }
+    }
+
+    loadConversations();
+  </script>
+</body>
+</html>
+

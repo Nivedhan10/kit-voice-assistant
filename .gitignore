@@ -1,0 +1,65 @@
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Databases & local persistence
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Deployment & IDE artifacts
+.vercel/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Audio recordings & temporary media
+temp_audio/
+*.webm
+*.wav
+*.mp3
+*.ogg
+
+# Log files
+*.log
+
+# Dependencies
+node_modules/
+
+# Raw offline reference PDFs (extracted to data/knowledge/ for runtime)
+documents/

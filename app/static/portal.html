@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KIT Portal — Student & Faculty Voice Assistant</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .login-box {
+      max-width: 480px;
+      margin: 2rem auto;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    .test-users-card {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.25rem;
+    }
+    .test-users-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .user-pill {
+      display: inline-block;
+      background: white;
+      border: 1px solid #cbd5e1;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .user-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .profile-banner {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+    .user-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .tag-student { background: #dbeafe; color: #1e40af; }
+    .tag-teacher { background: #dcfce7; color: #166534; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <div class="brand-logo">KIT</div>
+      <div>
+        <div class="brand-title">Knotopian Institute of Technology</div>
+        <div class="brand-subtitle">Student & Faculty Portal</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Home & Admissions</a>
+      <a href="/portal" class="active">Student & Teacher Portal</a>
+      <a href="/history">History</a>
+      <button id="logout-btn" onclick="doLogout()" style="display:none;" class="btn-login" style="background:#dc2626;">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- LOGIN VIEW (Shown if unauthenticated) -->
+    <div id="login-section" class="login-box">
+      <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem;">College Single Sign-On</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Authenticate with your KIT Student or Teacher credentials.</p>
+
+      <form id="login-form" onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username / Login ID</label>
+          <input type="text" id="login_id" class="form-input" placeholder="e.g. arjun or lakshmi" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="password" class="form-input" value="Kit@2026" required>
+        </div>
+        <button type="submit" class="btn-login" style="width: 100%; padding: 0.75rem; font-size: 1rem; border: none; cursor: pointer;">
+          Sign In to Portal
+        </button>
+      </form>
+
+      <div class="test-users-card">
+        <div class="test-users-title">Quick Test Logins (Password: Kit@2026)</div>
+        <div>
+          <strong>Students:</strong>
+          <span class="user-pill" onclick="quickFill('arjun')">arjun (CSE-2A)</span>
+          <span class="user-pill" onclick="quickFill('priya')">priya</span>
+          <span class="user-pill" onclick="quickFill('kavya')">kavya</span>
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <strong>Teachers:</strong>
+          <span class="user-pill" onclick="quickFill('lakshmi')">Dr. Lakshmi (Advisor)</span>
+          <span class="user-pill" onclick="quickFill('senthil')">Dr. Senthil</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTHENTICATED VOICE ASSISTANT VIEW -->
+    <div id="assistant-section" style="display: none;">
+      <!-- Profile Header -->
+      <div class="profile-banner">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+            <h2 id="prof-name" style="font-size: 1.25rem; font-weight: 700;">Loading...</h2>
+            <span id="prof-role" class="user-tag tag-student">Student</span>
+          </div>
+          <div id="prof-details" style="font-size: 0.85rem; color: var(--text-muted);">Class: CSE-2A · Department of CSE</div>
+        </div>
+        <button onclick="doLogout()" style="background:#fee2e2; color:#b91c1c; border:none; padding:0.5rem 1rem; border-radius:6px; font-weight:600; cursor:pointer;">
+          Log Out
+        </button>
+      </div>
+
+      <!-- Voice Assistant Card -->
+      <div class="voice-card">
+        <div class="voice-status-text" id="status-text">Tap the microphone to speak</div>
+
+        <div class="mic-button-wrapper">
+          <button id="mic-btn" class="mic-button" title="Click to start/stop speaking">
+            <svg class="mic-icon" viewBox="0 0 24 24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Live Voice Waveform -->
+        <canvas id="voice-wave" class="waveform-canvas" width="280" height="36"></canvas>
+
+        <!-- Dynamic Role Prompt Chips -->
+        <div id="role-prompts" class="prompt-chips"></div>
+
+        <!-- Confirmation card -->
+        <div id="confirmation-container" style="width: 100%;"></div>
+
+        <!-- Conversation Stream -->
+        <div class="conversation-container" id="conversation-container">
+          <div class="chat-bubble assistant" id="welcome-bubble">
+            Welcome to KIT Voice Assistant. What would you like to check today?
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Knotopian Institute of Technology · Authenticated Campus Voice Services
+  </footer>
+
+  <script src="/static/js/audio_recorder.js"></script>
+  <script src="/static/js/app.js"></script>
+  <script>
+    function quickFill(user) {
+      document.getElementById("login_id").value = user;
+      document.getElementById("password").value = "Kit@2026";
+    }
+
+    async function checkAuthStatus() {
+      try {
+        const res = await fetch("/api/v1/auth/me");
+        const data = await res.json();
+        if (data.authenticated) {
+          showAssistantView(data);
+        } else {
+          showLoginView();
+        }
+      } catch (e) {
+        showLoginView();
+      }
+    }
+
+    function showLoginView() {
+      document.getElementById("login-section").style.display = "block";
+      document.getElementById("assistant-section").style.display = "none";
+    }
+
+    function showAssistantView(user) {
+      document.getElementById("login-section").style.display = "none";
+      document.getElementById("assistant-section").style.display = "block";
+
+      document.getElementById("prof-name").innerText = user.full_name || user.login_id;
+      const roleElem = document.getElementById("prof-role");
+      roleElem.innerText = user.role.toUpperCase();
+      roleElem.className = `user-tag tag-${user.role}`;
+
+      document.getElementById("prof-details").innerText = `ID: ${user.user_id} · Class: ${user.class_code || 'General'} · Dept: ${user.department || 'KIT'}`;
+
+      // Set prompt chips
+      const promptsBox = document.getElementById("role-prompts");
+      if (user.role === "student") {
+        promptsBox.innerHTML = `
+          <button class="prompt-chip" onclick="sendVoiceText('What is my current attendance?')">My Attendance</button>
+          <button class="prompt-chip" onclick="sendVoiceText('When is my next exam scheduled?')">Exam Schedule</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Can I apply for leave on November 23rd?')">Test Leave on Exam Day</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Apply for personal leave on November 25th for family function.')">Apply Valid Leave</button>
+          <button class="prompt-chip" onclick="sendVoiceText('What is the deadline to submit on-duty proof under Circular 12?')">Circular 12 OD Rule</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Explain third normal form 3NF from DBMS lesson notes.')">DBMS 3NF Doubt</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Show active placement drives.')">Placement Drives</button>
+        `;
+      } else {
+        promptsBox.innerHTML = `
+          <button class="prompt-chip" onclick="sendVoiceText('Show pending student leave and on-duty requests.')">Pending Requests</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Which classes do I advise?')">My Classes</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Approve request 22 for Arjun.')">Approve Request 22</button>
+          <button class="prompt-chip" onclick="sendVoiceText('Reject request 26 due to proof missing.')">Reject Request 26</button>
+        `;
+      }
+    }
+
+    async function doLogin(e) {
+      e.preventDefault();
+      const login_id = document.getElementById("login_id").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ login_id, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          checkAuthStatus();
+        } else {
+          alert(data.detail || "Login failed");
+        }
+      } catch (err) {
+        alert("Login request error: " + err.message);
+      }
+    }
+
+    async function doLogout() {
+      await fetch("/api/v1/auth/logout", { method: "POST" });
+      location.reload();
+    }
+
+    // Check auth on load
+    checkAuthStatus();
+  </script>
+</body>
+</html>
+
