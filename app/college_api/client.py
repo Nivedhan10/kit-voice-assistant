@@ -172,6 +172,12 @@ class CollegeClient:
     async def register_placement_drive(self, token: str, drive_id: int) -> Dict[str, Any]:
         return await self._request("POST", f"/v1/placements/drives/{drive_id}/register", token=token)
 
+    async def get_my_placements(self, token: str) -> List[Dict[str, Any]]:
+        return await self._request("GET", "/v1/me/placements", token=token)
+
+    async def get_class_attendance(self, token: str, class_id: int) -> Dict[str, Any]:
+        return await self._request("GET", f"/v1/teacher/classes/{class_id}/attendance", token=token)
+
 
 college_client = CollegeClient()
 

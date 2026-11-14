@@ -44,6 +44,7 @@ The table below is generated directly from `app/agent/registry.py`, ensuring zer
 | `get_college_overview` | `public`, `student`, `teacher` | No | `GET /v1/college` |
 | `submit_admission_application` | `public` | **Yes** | `POST /v1/admissions/applications` |
 | `get_student_attendance` | `student` | No | `GET /v1/me/attendance` |
+| `get_student_academics` | `student` | No | `GET /v1/me/academics` |
 | `get_academic_schedule` | `student`, `teacher` | No | `GET /v1/me/timetable | GET /v1/calendar` |
 | `apply_leave_or_od` | `student` | **Yes** | `POST /v1/me/requests` |
 | `get_my_requests` | `student` | No | `GET /v1/me/requests` |
@@ -52,7 +53,9 @@ The table below is generated directly from `app/agent/registry.py`, ensuring zer
 | `search_lesson_notes` | `student` | No | `Internal KB (DBMS CS304 Notes)` |
 | `get_placement_drives` | `student` | No | `GET /v1/placements/drives` |
 | `register_placement_drive` | `student` | **Yes** | `POST /v1/placements/drives/{id}/register` |
+| `get_my_placement_registrations` | `student` | No | `GET /v1/me/placements` |
 | `get_teacher_classes` | `teacher` | No | `GET /v1/teacher/classes` |
+| `get_class_attendance_sheet` | `teacher` | No | `GET /v1/teacher/classes/{class_id}/attendance` |
 | `get_assigned_pending_requests` | `teacher` | No | `GET /v1/teacher/requests` |
 | `decide_student_request` | `teacher` | **Yes** | `POST /v1/teacher/requests/{id}/approve | reject` |
 
@@ -180,15 +183,15 @@ The service is pre-configured for automated deployment on **Render** (as a long-
 
 ---
 
-## 6. Test Credentials
+## 6. Test User Accounts
 
-| Role | Username | Password | Notes |
+| Role | Username | Authentication | Notes |
 |---|---|---|---|
-| Student | `arjun` | `Kit@2026` | 2nd Year CSE-2A, Attendance: 76.0% (Eligible) |
-| Student | `priya` | `Kit@2026` | 2nd Year CSE-2A, Attendance: 70.0% (Shortage Warning) |
-| Student | `kavya` | `Kit@2026` | 2nd Year CSE-2A |
-| Teacher | `lakshmi` | `Kit@2026` | Class Advisor for CSE-2A (3 Pending Approvals) |
-| Teacher | `senthil` | `Kit@2026` | Department Faculty |
+| Student | `arjun` | *College SSO Credentials (Access Card)* | 2nd Year CSE-2A, Attendance: 76.0% (Eligible) |
+| Student | `priya` | *College SSO Credentials (Access Card)* | 2nd Year CSE-2A, Attendance: 70.0% (Shortage Warning) |
+| Student | `kavya` | *College SSO Credentials (Access Card)* | 2nd Year CSE-2A |
+| Teacher | `lakshmi` | *College SSO Credentials (Access Card)* | Class Advisor for CSE-2A (3 Pending Approvals) |
+| Teacher | `senthil` | *College SSO Credentials (Access Card)* | Department Faculty |
 
 ---
 

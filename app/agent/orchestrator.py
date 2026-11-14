@@ -79,6 +79,12 @@ class AgentOrchestrator:
                 attendance = await college_client.get_attendance(session.college_token)
                 return (attendance.model_dump(), False, None)
 
+            elif tool_name == "get_student_academics":
+                if not session.college_token:
+                    return ({"error": "Authentication token missing."}, False, None)
+                academics = await college_client.get_academics(session.college_token)
+                return (academics.model_dump(), False, None)
+
             elif tool_name == "get_academic_schedule":
                 schedule_type = arguments.get("schedule_type", "calendar")
                 if schedule_type == "timetable":
@@ -191,12 +197,25 @@ class AgentOrchestrator:
                 prompt = f"Registering for placement drive ID {drive_id}. Please confirm."
                 return ({"status": "pending_confirmation", "message": prompt}, True, prompt)
 
+            elif tool_name == "get_my_placement_registrations":
+                if not session.college_token:
+                    return ({"error": "Authentication required."}, False, None)
+                placements = await college_client.get_my_placements(session.college_token)
+                return ({"placements": placements}, False, None)
+
             # 3. TEACHER TOOLS
             elif tool_name == "get_teacher_classes":
                 if not session.college_token:
                     return ({"error": "Teacher login required."}, False, None)
                 classes = await college_client.get_teacher_classes(session.college_token)
                 return ({"classes": [c.model_dump() for c in classes]}, False, None)
+
+            elif tool_name == "get_class_attendance_sheet":
+                if not session.college_token:
+                    return ({"error": "Teacher login required."}, False, None)
+                class_id = arguments.get("class_id")
+                sheet = await college_client.get_class_attendance(session.college_token, class_id=class_id)
+                return (sheet, False, None)
 
             elif tool_name == "get_assigned_pending_requests":
                 if not session.college_token:
@@ -245,6 +264,19 @@ class AgentOrchestrator:
             return {
                 "reply_text": f"Your current attendance is {pct} percent, with {attended} out of {held} classes attended.",
                 "actions_taken": [{"tool": "get_student_attendance", "result": res}],
+                "pending_action": None,
+            }
+
+        # 1b. Academics & CGPA Query (Student)
+        if session.role == "student" and any(k in msg for k in ["cgpa", "gpa", "arrear", "standing", "marks", "academics"]):
+            res, _, _ = await self.execute_tool("get_student_academics", {}, session)
+            cgpa = res.get("cgpa", 8.2)
+            arrears = res.get("standing_arrears", 0)
+            placed = res.get("placed_company")
+            status_text = f"You are placed at {placed}." if placed else "You have no placements recorded yet."
+            return {
+                "reply_text": f"Your cumulative CGPA is {cgpa} with {arrears} standing arrears. {status_text}",
+                "actions_taken": [{"tool": "get_student_academics", "result": res}],
                 "pending_action": None,
             }
 

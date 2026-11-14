@@ -93,6 +93,17 @@ TOOL_REGISTRY: List[ToolDefinition] = [
         college_endpoint="GET /v1/me/attendance"
     ),
     ToolDefinition(
+        name="get_student_academics",
+        description="Retrieve the authenticated student's academic standing, including cumulative CGPA, standing arrears, and placement status.",
+        allowed_roles=["student"],
+        parameters={
+            "type": "object",
+            "properties": {}
+        },
+        needs_confirmation=False,
+        college_endpoint="GET /v1/me/academics"
+    ),
+    ToolDefinition(
         name="get_academic_schedule",
         description="Get academic schedule, including timetable, active semester calendar, holidays, and examination dates.",
         allowed_roles=["student", "teacher"],
@@ -215,6 +226,17 @@ TOOL_REGISTRY: List[ToolDefinition] = [
         needs_confirmation=True,
         college_endpoint="POST /v1/placements/drives/{id}/register"
     ),
+    ToolDefinition(
+        name="get_my_placement_registrations",
+        description="List placement recruitment drives the authenticated student has already registered for.",
+        allowed_roles=["student"],
+        parameters={
+            "type": "object",
+            "properties": {}
+        },
+        needs_confirmation=False,
+        college_endpoint="GET /v1/me/placements"
+    ),
 
     # 3. AUTHENTICATED TEACHER TOOLS (Accessible: teacher ONLY)
     ToolDefinition(
@@ -227,6 +249,20 @@ TOOL_REGISTRY: List[ToolDefinition] = [
         },
         needs_confirmation=False,
         college_endpoint="GET /v1/teacher/classes"
+    ),
+    ToolDefinition(
+        name="get_class_attendance_sheet",
+        description="Retrieve class-wide student attendance sheet and percentages for an authorized class section.",
+        allowed_roles=["teacher"],
+        parameters={
+            "type": "object",
+            "properties": {
+                "class_id": {"type": "integer", "description": "The class ID to retrieve attendance for."}
+            },
+            "required": ["class_id"]
+        },
+        needs_confirmation=False,
+        college_endpoint="GET /v1/teacher/classes/{class_id}/attendance"
     ),
     ToolDefinition(
         name="get_assigned_pending_requests",

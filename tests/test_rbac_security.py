@@ -115,3 +115,27 @@ def test_history_endpoint_unauthenticated_blocked():
     assert res.status_code == 401
     assert "Authentication required" in res.json()["detail"]
 
+
+def test_rate_limiter_enforcement():
+    """Rate limiter allows requests within threshold and blocks excess."""
+    from app.main import InMemoryRateLimiter
+    limiter = InMemoryRateLimiter(requests_per_minute=3)
+    assert limiter.is_allowed("192.168.1.100") is True
+    assert limiter.is_allowed("192.168.1.100") is True
+    assert limiter.is_allowed("192.168.1.100") is True
+    assert limiter.is_allowed("192.168.1.100") is False  # 4th request blocked
+
+
+def test_audio_format_validation():
+    """Uploading a non-audio file like a script or executable must be rejected with 415."""
+    from starlette.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    # Upload text/plain instead of audio
+    files = {"audio": ("test.sh", b"#!/bin/bash\necho hack", "text/x-shellscript")}
+    res = client.post("/api/v1/voice/chat", files=files)
+    assert res.status_code == 415
+    assert "Invalid audio format" in res.json()["detail"]
+
+

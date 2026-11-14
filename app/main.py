@@ -2,6 +2,9 @@
 
 import base64
 import logging
+import time
+from collections import defaultdict
+from contextlib import asynccontextmanager
 from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -21,18 +24,61 @@ from app.history.store import history_store
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("kit_assistant")
 
+
+# In-Memory Sliding-Window Rate Limiter for Abuse & Brute-Force Protection
+class InMemoryRateLimiter:
+    def __init__(self, requests_per_minute: int):
+        self.rate = requests_per_minute
+        self.window = 60.0
+        self.requests: Dict[str, List[float]] = defaultdict(list)
+
+    def is_allowed(self, key: str) -> bool:
+        now = time.time()
+        timestamps = self.requests[key]
+        self.requests[key] = [t for t in timestamps if now - t < self.window]
+        if len(self.requests[key]) >= self.rate:
+            return False
+        self.requests[key].append(now)
+        return True
+
+
+login_limiter = InMemoryRateLimiter(requests_per_minute=20)
+voice_limiter = InMemoryRateLimiter(requests_per_minute=60)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if not settings.COLLEGE_API_KEY:
+        logger.error("Required environment variable COLLEGE_API_KEY is missing. College system integration requires this key.")
+    if not settings.GROQ_API_KEY and not settings.GEMINI_API_KEY and not settings.OPENAI_API_KEY:
+        logger.warning("No AI provider key configured. Speech and LLM will use deterministic fallback engine.")
+    yield
+
+
 app = FastAPI(
     title="Knotopian Institute of Technology (KIT) Voice Assistant",
     description="Production-grade real-time voice assistant with RBAC and academic rule enforcement.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
-# CORS configuration
+# Standard-compliant CORS configuration
+ALLOWED_ORIGINS = [
+    "https://kit-voice-assistant-wezp.onrender.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "https://quirri.ai",
+    "https://www.quirri.ai",
+    "https://ht.knowvally.com",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|.*\.onrender\.com|.*\.quirri\.ai)(:\d+)?",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -43,15 +89,6 @@ async def proxy_headers_middleware(request: Request, call_next):
     if proto:
         request.scope["scheme"] = proto
     return await call_next(request)
-
-
-# Startup Configuration Validation
-@app.on_event("startup")
-async def on_startup():
-    if not settings.COLLEGE_API_KEY:
-        logger.error("Required environment variable COLLEGE_API_KEY is missing. College system integration requires this key.")
-    if not settings.GROQ_API_KEY and not settings.GEMINI_API_KEY and not settings.OPENAI_API_KEY:
-        logger.warning("No AI provider key configured. Speech and LLM will use deterministic fallback engine.")
 
 
 # Mount static files
@@ -102,7 +139,14 @@ async def health_check():
 
 # --- Authentication Endpoints ---
 @app.post("/api/v1/auth/login")
-async def login(payload: LoginPayload, response: Response):
+async def login(payload: LoginPayload, request: Request, response: Response):
+    client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown").split(",")[0].strip()
+    if not login_limiter.is_allowed(client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many login attempts. Please wait a moment before trying again."
+        )
+
     try:
         login_res = await college_client.login(login_id=payload.login_id, password=payload.password)
         user_info = login_res.user.model_dump()
@@ -111,7 +155,12 @@ async def login(payload: LoginPayload, response: Response):
         # Create authenticated server session (token never leaves server)
         session = session_manager.create_authenticated_session(college_token=token, user_info=user_info)
 
-        # Set secure httpOnly cookie
+        # Set secure httpOnly cookie (auto-detect HTTPS)
+        is_https = (
+            settings.COOKIE_SECURE
+            or request.url.scheme == "https"
+            or request.headers.get("x-forwarded-proto") == "https"
+        )
         signed_cookie = session_manager._sign(session.session_id)
         response.set_cookie(
             key=settings.SESSION_COOKIE_NAME,
@@ -119,7 +168,7 @@ async def login(payload: LoginPayload, response: Response):
             max_age=settings.SESSION_MAX_AGE_SECONDS,
             httponly=True,
             samesite="lax",
-            secure=settings.COOKIE_SECURE,
+            secure=is_https,
         )
 
         return {
@@ -164,6 +213,7 @@ async def get_me(session: SessionData = Depends(get_session)):
 # --- Core Voice Assistant Endpoint ---
 @app.post("/api/v1/voice/chat")
 async def voice_chat(
+    request: Request,
     audio: Optional[UploadFile] = File(None),
     text: Optional[str] = Form(None),
     session: SessionData = Depends(get_session),
@@ -171,10 +221,23 @@ async def voice_chat(
     """Processes user voice interaction through external STT -> Agent ReAct -> TTS.
     Web Speech API is strictly NOT used.
     """
+    client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown").split(",")[0].strip()
+    if not voice_limiter.is_allowed(client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit reached for voice interactions. Please wait a moment."
+        )
+
     transcript = ""
 
     # 1. Speech-to-Text via External Speech Service
     if audio:
+        if audio.content_type and not (
+            audio.content_type.startswith("audio/")
+            or audio.content_type.startswith("video/")
+            or audio.content_type in ("application/octet-stream", "application/ogg")
+        ):
+            raise HTTPException(status_code=415, detail="Invalid audio format. Please upload WebM, WAV, or MP3.")
         content = await audio.read()
         if len(content) > settings.MAX_AUDIO_SIZE_BYTES:
             raise HTTPException(status_code=413, detail="Audio file exceeds 10MB limit.")

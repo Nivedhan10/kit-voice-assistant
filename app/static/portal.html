@@ -46,37 +46,17 @@
           <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--brand-navy); margin-bottom:0.4rem;">
             Password
           </label>
-          <input type="password" id="password" class="dual-input-text" style="width:100%; border-radius:8px;" value="Kit@2026" required>
+          <input type="password" id="password" class="dual-input-text" style="width:100%; border-radius:8px;" placeholder="Enter your password" autocomplete="current-password" required>
         </div>
         <button type="submit" id="login-submit-btn" class="btn-dual-send" style="width:100%; justify-content:center; padding:0.85rem; border-radius:8px;">
           Sign In to Campus Portal
         </button>
       </form>
 
-      <!-- Testing Reference Accounts (Pre-fills credentials on click for convenience) -->
-      <div class="test-creds-container">
-        <div class="test-creds-header">
-          <span>Demo Test Accounts</span>
-          <span>Password: <strong>Kit@2026</strong></span>
-        </div>
-        <div class="creds-list">
-          <div class="cred-row" onclick="fillCredentials('arjun')">
-            <span class="cred-user">👨‍🎓 arjun</span>
-            <span class="cred-meta">Student · 76% Attendance (Eligible)</span>
-          </div>
-          <div class="cred-row" onclick="fillCredentials('priya')">
-            <span class="cred-user">👩‍🎓 priya</span>
-            <span class="cred-meta">Student · 70% Attendance (Shortage Alert)</span>
-          </div>
-          <div class="cred-row" onclick="fillCredentials('lakshmi')">
-            <span class="cred-user">👩‍🏫 lakshmi</span>
-            <span class="cred-meta">Faculty Advisor · CSE-2A (3 Pending Approvals)</span>
-          </div>
-          <div class="cred-row" onclick="fillCredentials('senthil')">
-            <span class="cred-user">👨‍🏫 senthil</span>
-            <span class="cred-meta">Faculty · Department of CSE</span>
-          </div>
-        </div>
+      <!-- Institutional Security Notice -->
+      <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(30, 41, 59, 0.03); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; font-size: 0.82rem; color: #64748b; line-height: 1.5;">
+        <strong style="color: var(--brand-navy);">KIT Campus Authentication:</strong>
+        Please sign in with your official Knotopian Institute of Technology student or faculty portal credentials. All sessions are encrypted and managed via secure, HttpOnly session tokens.
       </div>
     </div>
 
@@ -191,12 +171,6 @@
       document.getElementById("login-section").style.display = "block";
       document.getElementById("assistant-section").style.display = "none";
       document.getElementById("logout-btn").style.display = "none";
-    }
-
-    function fillCredentials(username) {
-      document.getElementById("login_id").value = username;
-      document.getElementById("password").value = "Kit@2026";
-      document.getElementById("login_id").focus();
     }
 
     function showAssistantView(user) {
